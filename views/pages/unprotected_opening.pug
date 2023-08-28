@@ -1,0 +1,52 @@
+doctype html
+html
+  head
+    title Unprotected Opening Calculations
+    include ./navbar.pug
+    script(src="https://unpkg.com/xlsx/dist/xlsx.full.min.js")
+    script(src='./js/upo_charts.js')
+    script(src='./js/unprotected_opening.js')
+
+  body
+    h1 Calculate Unprotected Opening Percentage
+    p 
+        |Allows for quick calculations of Unprotected Opening Limits using the following tables:
+        br 
+        strong Table 3.2.3.1.B. Unprotected Opening Limits for a Building or Fire Compartment that is not Sprinklered
+        br
+        strong Table 3.2.3.1.C. Unprotected Opening Limits for a Building or Fire Compartment that is not Sprinklered
+        br
+        strong Table 3.2.3.1.D. Unprotected Opening Limits for a Building or Fire Compartment that is Sprinklered
+        br
+        strong Table 3.2.3.1.E. Unprotected Opening Limits for a Building or Fire Compartment that is Sprinklered
+    br
+    strong Choose whether building is Non-Sprinklered on Sprinklered:
+    br
+    select.form-select(aria-label='Default select example' id='sprinkle')
+      option(value='Non-Sprinklered') Non-Sprinklered
+      option(value='Sprinklered') Sprinklered
+    br
+    br
+    strong Choose building type:
+    br
+    select.form-select(aria-label='Default select example' id='buildingType')
+      option(value='A') A
+      option(value='C') C
+      option(value='D') D
+      option(value='E') E
+      option(value='F1') F1
+      option(value='F2') F2
+      option(value='F3') F3
+    br
+    br
+    
+    p Upload excel file with measurements
+    form(enctype="multipart/form-data")
+      div
+        label(for="excelFile") Select Excel file:
+        input(type="file" id="excelFile" onclick="this.value=null;" accept=".xls,.xlsx")
+    br
+    br
+    table(id="myTable" class="table table-bordered")
+
+
