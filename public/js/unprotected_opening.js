@@ -163,7 +163,18 @@ function getSheetNumber(list_of_sheet_numbers){
     return 0
 }
 
-function determine_max_area(area_value){
+function determine_max_area(area_value, isBuildingSprinklered, buildingType){
+    if(isBuildingSprinklered){
+        if((buildingType === 'A' || buildingType === 'B' || buildingType === 'C' || buildingType === 'D' || buildingType === 'F3') && 
+        area_value >= 150){
+            return 150
+        }
+
+        if((buildingType === 'E' || buildingType === 'F1' || buildingType === 'F2') && area_value >= 200){
+            return 200
+        }
+    }
+
     if(area_value <= 10){
         final_area = 10
     }else if(area_value <= 15){
@@ -214,7 +225,7 @@ function determine_ratio_length_height(ratio){
 
 function limiting_distance_to_index(lim_dist){
     index = 0
-    lim_distances = [0, 1.2, 1.5, 2, 2.5, 3 ,4, 5 ,6,7,8,9,10,11,12,13,14,16,18,20,25,30,35,40,45,50]
+    lim_distances = [0, 1.2, 1.5, 2, 2.5, 3 ,4, 5 ,6,7,8,9,10,11,12,13,14,16,18,20,25,30,35,40,45,50,55,60, 65, 70]
 
     for(let i = 0;i<lim_distances.length;i++){
         if(lim_dist <= lim_distances[i]){
@@ -256,14 +267,16 @@ function determineWhichChartToUse(isBuildingSprinklered, buildingType){
 }
 
 function get_allowable_unprotected_opening_percentage(area, lh_ratio, limiting_distance, isBuildingSprinklered, buildingType){
-    max_area = determine_max_area(area)
+    max_area = determine_max_area(area, isBuildingSprinklered, buildingType)
     ratio_length_height = 1
     if(!isBuildingSprinklered){
         ratio_length_height = determine_ratio_length_height(lh_ratio)
     }
     limit_distance_index = limiting_distance_to_index(limiting_distance)
     chartToUse = determineWhichChartToUse(isBuildingSprinklered, buildingType)
+    console.log("Max area: "+ max_area+", Ratio l/h: "+ratio_length_height+", ld_index: "+limit_distance_index)
     opening_percentage = get_percentage(max_area, ratio_length_height, limit_distance_index, chartToUse)
+    console.log(opening_percentage)
     return opening_percentage
 }
 
