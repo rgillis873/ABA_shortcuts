@@ -24,11 +24,22 @@ app.get("/", async(req, res)=>{
     }
 })
 
-//Displays page for calculating limiting distance
+//Displays page for calculating unprotected openings
 app.get("/unprotected_opening", async(req, res)=>{
     try {
         //Render the page
         res.render("pages/unprotected_opening", {
+        });
+    } catch (err) {
+        console.error(err.message);
+    }
+})
+
+//Displays page for upo chart lookups
+app.get("/upo_charts", async(req, res)=>{
+    try {
+        //Render the page
+        res.render("pages/upo_charts", {
         });
     } catch (err) {
         console.error(err.message);

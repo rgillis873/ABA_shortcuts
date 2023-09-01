@@ -1,4 +1,8 @@
 const unprotected_opening_limits_b = {
+    "table_name" : "Area of Unprotected Openings for Groups A, C, D, and F, Division 3 Occupancies, %",
+    "columns": 26,
+    "column_numbers": [0,1.2,1.5,2,2.5,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,25,30,350,40,45,50],
+    "row_numbers": [10,15,20,25,30,40,50,60,80,100,150,250,350,500,1000,2000],
     10 : {
         1: [0,8,10,18,29,46,91,100],
         2: [0,8,12,21,33,50,96,100],
@@ -82,6 +86,10 @@ const unprotected_opening_limits_b = {
   }
   
 const unprotected_opening_limits_c = {
+    "table_name" : "Area of Unprotected Openings for Groups E, and F, Division 1 and 2 Occupancies, %",
+    "columns": 30,
+    "column_numbers": [0,1.2,1.5,2,2.5,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,25,30,35,40,45,50,55,60,65,70],
+    "row_numbers": [10,15,20,25,30,40,50,60,80,100,150,250,350,500,1000,2000],
       10 : {
           1: [0,4,5,9,15,23,46,77,100],
           2: [0,4,6,10,17,25,48,79,100],
@@ -165,6 +173,10 @@ const unprotected_opening_limits_c = {
   }
   
 const unprotected_opening_limits_d = {
+    "table_name" : "Area of Unprotected Openings for Groups A, B, C, D, and F, Division 3 Occupancies, %",
+    "columns": 12,
+    "column_numbers": [0,1.2,1.5,2,2.5,3,4,5,6,7,8,9],
+    "row_numbers": [10,15,20,25,30,40,50,60,80,100,150],
       10 : {
           1: [0,16,24,42,66,100]
       },
@@ -201,6 +213,10 @@ const unprotected_opening_limits_d = {
   }
   
 const unprotected_opening_limits_e = {
+    "table_name" : "Area of Unprotected Openings for Groups E, and F, Division 1 and 2 Occupancies, %",
+    "columns":18,
+    "column_numbers": [0,1.2,1.5,2,2.5,3,4,5,6,7,8,9,10,11,12,13,14,15],
+    "row_numbers": [10,15,20,25,30,40,50,60,80,100,150,200],
       10 : {
           1: [0,8,12,20,34,50,96,100]
       },

@@ -97,13 +97,13 @@ function fillOutTableData(row, rowData){
             buildingType = document.getElementById('buildingType').value
             allowable_opening = get_allowable_unprotected_opening_percentage(rowData[1], rowData[3], rowData[2], isBuildingSprinklered, buildingType)
                             
-            if(rowData[6] != undefined && Math.round((rowData[6] + Number.EPSILON) * 100) > allowable_opening){
+            if(rowData[6] != undefined && (rowData[6] * 100) > allowable_opening){
                 upoWithinLimits = false
             }
             cell.textContent = allowable_opening
         }else if(i == 6){
             if(rowData[6] != undefined){
-                cell.textContent = Math.round((rowData[6] + Number.EPSILON) * 100)
+                cell.textContent = rowData[6] * 100
             }else{
                 cell.textContent = " "
             }
@@ -156,7 +156,7 @@ function addBuildingTypeOptions(){
 
 function getSheetNumber(list_of_sheet_numbers){
     for(let i = 0;i<list_of_sheet_numbers.length;i++){
-        if(list_of_sheet_numbers[i].startsWith("UPO Calculations")){
+        if(list_of_sheet_numbers[i].startsWith("UPO Calculations - Part 3")){
             return i
         }
     }
@@ -175,40 +175,12 @@ function determine_max_area(area_value, isBuildingSprinklered, buildingType){
         }
     }
 
-    if(area_value <= 10){
-        final_area = 10
-    }else if(area_value <= 15){
-        final_area = 15
-    }else if(area_value <= 20){
-        final_area = 20
-    }else if(area_value <= 25){
-        final_area = 25
-    }else if(area_value <= 30){
-        final_area = 30
-    }else if(area_value <= 40){
-        final_area = 40
-    }else if(area_value <= 50){
-        final_area = 50
-    }else if(area_value <= 60){
-        final_area = 60
-    }else if(area_value <= 80){
-        final_area = 80
-    }else if(area_value <= 100){
-        final_area = 100
-    }else if(area_value <= 150){
-        final_area = 150
-    }else if(area_value <= 250){
-        final_area = 250
-    }else if(area_value <= 350){
-        final_area = 350
-    }else if(area_value <= 500){
-        final_area = 500
-    }else if(area_value <= 1000){
-        final_area = 1000
-    }else{
-        final_area = 2000
+    var area_values = [10,15,20,25,30,40,50,60,80,100,150,250,350,500,1000,2000]
+    for(let i = 0;i<area_values.length;i++){
+        if(area_value <= area_values[i]){
+            return area_values[i]
+        }
     }
-    return final_area
 }
 
 function determine_ratio_length_height(ratio){
@@ -274,9 +246,7 @@ function get_allowable_unprotected_opening_percentage(area, lh_ratio, limiting_d
     }
     limit_distance_index = limiting_distance_to_index(limiting_distance)
     chartToUse = determineWhichChartToUse(isBuildingSprinklered, buildingType)
-    console.log("Max area: "+ max_area+", Ratio l/h: "+ratio_length_height+", ld_index: "+limit_distance_index)
     opening_percentage = get_percentage(max_area, ratio_length_height, limit_distance_index, chartToUse)
-    console.log(opening_percentage)
     return opening_percentage
 }
 
