@@ -1,15 +1,25 @@
 const chartList = [unprotected_opening_limits_b, unprotected_opening_limits_c, unprotected_opening_limits_d, unprotected_opening_limits_e]
 
+var selectedColumn = -1
+var selectedRow = -1
+
 document.addEventListener('DOMContentLoaded', function() {
+    generateTableSelection()
     document.getElementById('tableType').addEventListener('change', function(evt) {
-        tableSelection = document.getElementById('tableType').value
-        clearTable()
-        addFirstHeadersToTable(tableSelection)
-        addSecondHeadersToTable(tableSelection)
-        addThirdHeadersToTable(tableSelection)
-        addRowsToTable(tableSelection)
+        generateTableSelection()
     })
 });
+
+function generateTableSelection(){
+    tableSelection = document.getElementById('tableType').value
+    selectedColumn = -1
+    selectedRow = -1
+    clearTable()
+    addFirstHeadersToTable(tableSelection)
+    addSecondHeadersToTable(tableSelection)
+    addThirdHeadersToTable(tableSelection)
+    addRowsToTable(tableSelection)
+}
 
 function clearTable(){
     upoTable = document.getElementById("upo_chart")
@@ -19,7 +29,6 @@ function clearTable(){
 function addFirstHeadersToTable(chartType){
     upoTable = document.getElementById("upo_chart")
 
-    // Create a new row
     var row = document.createElement('tr')
 
     var chartIndex = getChartIndex(chartType)
@@ -28,8 +37,12 @@ function addFirstHeadersToTable(chartType){
 
     var headerOne = document.createElement('th')
     var headerTwo = document.createElement('th')
-    headerOne.colSpan = "2"
-    headerTwo.colSpan = ""+chartColumnNumber+""
+    if(chartIndex < 2){
+        headerOne.colSpan = "2"
+        headerTwo.colSpan = ""+(chartColumnNumber+1)+""
+    }else{
+        headerTwo.colSpan = ""+chartColumnNumber+""
+    }
     headerOne.textContent = "Exposing Building Face"
     headerTwo.textContent = chartTitle
 
@@ -42,7 +55,6 @@ function addFirstHeadersToTable(chartType){
 function addSecondHeadersToTable(chartType){
     upoTable = document.getElementById("upo_chart")
 
-    // Create a new row
     var row = document.createElement('tr')
 
     var chartIndex = getChartIndex(chartType)
@@ -74,7 +86,6 @@ function addSecondHeadersToTable(chartType){
 function addThirdHeadersToTable(chartType){
     upoTable = document.getElementById("upo_chart")
 
-    // Create a new row
     var row = document.createElement('tr')
 
     var chartIndex = getChartIndex(chartType)
@@ -84,10 +95,150 @@ function addThirdHeadersToTable(chartType){
         var cell = document.createElement('td')
         cell.id = "col "+i+""
         cell.textContent = chartList[chartIndex]["column_numbers"][i]
+        cell.setAttribute('onclick', "highlightColumn(this.id)")
         row.appendChild(cell)
     }
 
     upoTable.appendChild(row)
+}
+
+function highlightColumn(id){
+    var columnNumber = Number(id.split(" ").pop())
+
+    if(selectedColumn === columnNumber){
+        unselectAllInColumn(columnNumber)
+        selectedColumn = -1
+    }else if(selectedColumn > -1 && selectedColumn !== columnNumber){
+        unselectAllInColumn(selectedColumn)
+        selectedColumn = columnNumber
+        selectAllInColumn(columnNumber)
+    }else{
+        selectedColumn = columnNumber
+        selectAllInColumn(columnNumber)     
+    }
+}
+
+function selectAllInColumn(columnNumber){
+    var allCells = document.getElementsByTagName('td')
+
+    Array.from(allCells).forEach((cell) =>{
+        if(cell.id.startsWith("cell")){
+            var cellIndices = cell.id.split(" ")
+            var cellColumnNumber = Number(cellIndices.pop())
+            if(columnNumber === cellColumnNumber){
+                var cellRowNumber = Number(cellIndices.pop())
+                if(selectedRow === -1 || cellRowNumber <= selectedRow){
+                    cell.classList.add('selectedCol')
+                }
+            }
+        }else if(cell.id.startsWith("col")){
+            var cellIndices = cell.id.split(" ")
+            var cellColumnNumber = Number(cellIndices.pop())
+            if(selectedColumn === cellColumnNumber){
+                cell.classList.add('selectedCol')
+            }
+        }
+    })
+}
+
+function unselectAllInColumn(columnNumber){
+    var allCells = document.getElementsByTagName('td')
+
+    Array.from(allCells).forEach( (cell) =>{
+        if(cell.id.startsWith("cell")){
+            var cellColumnNumber = Number(cell.id.split(" ").pop())
+            if(columnNumber === cellColumnNumber){
+                cell.classList.remove('selectedCol')
+            }
+        }else if(cell.id.startsWith("col")){
+            var cellColumnNumber = Number(cell.id.split(" ").pop())
+            if(selectedColumn === cellColumnNumber){
+                cell.classList.remove('selectedCol')
+            }
+        }
+    })
+}
+
+function highlightRowBC(id){
+    var rowIndices= id.split(" ")
+    var ratioIndex = Number(rowIndices.pop())
+    var areaIndex = Number(rowIndices.pop())
+    var rowNumber = (areaIndex*3)+ratioIndex
+    console.log(rowNumber)
+
+    if(selectedRow === rowNumber){
+        unselectAllInRowBC(selectedRow)
+        selectedRow = -1
+    }else if(selectedRow > -1 && selectedRow !== rowNumber){
+        unselectAllInRowBC(selectedRow)
+        selectedRow = rowNumber
+        selectAllInRowBC(areaIndex, ratioIndex)
+    }else{
+        selectedRow = rowNumber
+        selectAllInRowBC(areaIndex, ratioIndex)
+    }
+}
+
+function selectAllInRowBC(areaIndex, ratioIndex){
+    var allCells = document.getElementsByTagName('td')
+
+    Array.from(allCells).forEach((cell) =>{
+        if(cell.id.startsWith("cell")){
+            var cellIndices = cell.id.split(" ")
+            var cellAreaNumber = Number(cellIndices[1])
+            var cellRatioNumber = Number(cellIndices[2])
+            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
+                var cellColumnNumber = Number(cellIndices[3])
+                if(selectedColumn === -1 || cellColumnNumber <= selectedColumn){
+                    cell.classList.add('selectedRow')
+                }
+            }
+        }else if(cell.id.startsWith("area")){
+            var cellIndices = cell.id.split(" ")
+            var cellAreaNumber = Number(cellIndices[1])
+            if(areaIndex === cellAreaNumber){
+                cell.classList.add('selectedRow')
+            }
+        }else if(cell.id.startsWith("ratio")){
+            var cellIndices = cell.id.split(" ")
+            var cellAreaNumber = Number(cellIndices[1])
+            var cellRatioNumber = Number(cellIndices[2])
+            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
+                cell.classList.add('selectedRow')
+            }
+        }
+    })
+}
+
+function unselectAllInRowBC(selectedRow){
+    var allCells = document.getElementsByTagName('td')
+    var areaIndex = Math.floor(selectedRow/3)
+    var ratioIndex = selectedRow%3
+    console.log("area: "+areaIndex)
+    console.log("ratio: "+ratioIndex)
+
+    Array.from(allCells).forEach( (cell) =>{
+        if(cell.id.startsWith("cell")){
+            var cellIndices = cell.id.split(" ")
+            var cellAreaNumber = Number(cellIndices[1])
+            var cellRatioNumber = Number(cellIndices[2])
+            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
+                cell.classList.remove('selectedRow')
+            }
+        }else if(cell.id.startsWith("area")){
+            var cellAreaNumber = Number(cell.id.split(" ").pop())
+            if(areaIndex === cellAreaNumber){
+                cell.classList.remove('selectedRow')
+            }
+        }else if(cell.id.startsWith("ratio")){
+            var cellIndices = cell.id.split(" ")
+            var cellAreaNumber = Number(cellIndices[1])
+            var cellRatioNumber = Number(cellIndices[2])
+            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
+                cell.classList.remove('selectedRow')
+            }
+        }
+    })
 }
 
 function addRowsToTable(chartType){
@@ -103,15 +254,14 @@ function addRowsToTable(chartType){
 
 }
 
+
 function createNonSprinkleredRows(upoTable, chartIndex){
     var chartColumnNumber = chartList[chartIndex]["columns"]
     var rowNumbers = chartList[chartIndex]["row_numbers"]
-    console.log(rowNumbers)
     var rowNumbersLength = rowNumbers.length
 
     for(let i = 0;i<rowNumbersLength;i++){
         var rowOne = document.createElement('tr')
-        var rowTwo = document.createElement('tr')
 
         var cellForMaxArea = document.createElement('td')
         cellForMaxArea.rowSpan = "4"
@@ -119,32 +269,34 @@ function createNonSprinkleredRows(upoTable, chartIndex){
         cellForMaxArea.textContent = ""+rowNumbers[i]+""
         cellForMaxArea.id = "area "+i
         rowOne.appendChild(cellForMaxArea)
+        upoTable.appendChild(rowOne)
 
         var ratioValues = ["Less than 3:1", "3:1 to 10:1", "over 10:1"]
 
-        for(let j = 0;j<ratioValues.length;j++){
+        for(let j = 0;j<3;j++){
+            var rowTwo = document.createElement('tr')
             var cellForRatio = document.createElement('td')
             cellForRatio.textContent = ratioValues[j]
-            cellForRatio.id = "ratio "+j
+            cellForRatio.id = "ratio "+i+" "+j
+            cellForRatio.setAttribute('onclick', "highlightRowBC(this.id)")
             rowTwo.appendChild(cellForRatio)
 
+            var rowValues = chartList[chartIndex][rowNumbers[i]][j+1]
+            var rowValuesLength = rowValues.length
 
-            for(let k = 1;k<4;k++){
-                console.log("chart index: " + chartIndex+" i: "+rowNumbers[i]+" k: "+k)
-                var rowValues = chartList[chartIndex][rowNumbers[i]][k]
-                var rowValuesLength = rowValues.length
-
-                for(let l = 0;l<rowValuesLength;l++){
-                
-                    var cellForRowValue = document.createElement('td')
-                    cellForRowValue.id = i+"-"+j+"-"+l
+            for(let l = 0;l<chartColumnNumber;l++){
+                    
+                var cellForRowValue = document.createElement('td')
+                cellForRowValue.id = "cell "+i+" "+j+" "+l
+                if(l < rowValuesLength){
                     cellForRowValue.textContent = rowValues[l]
-                    rowTwo.appendChild(cellForRowValue)
+                }else{
+                    cellForRowValue.textContent = 100
                 }
+                rowTwo.appendChild(cellForRowValue)
             }
+            upoTable.appendChild(rowTwo)
         }
-        upoTable.appendChild(rowOne)
-        upoTable.appendChild(rowTwo)
     }
 }
 
@@ -152,6 +304,34 @@ function createSprinkleredRows(upoTable, chartIndex){
     var chartColumnNumber = chartList[chartIndex]["columns"]
     var rowNumbers = chartList[chartIndex]["row_numbers"]
     var rowNumbersLength = rowNumbers.length
+
+    
+    for(let i = 0;i<rowNumbersLength;i++){
+        var rowOne = document.createElement('tr')
+
+        var cellForMaxArea = document.createElement('td')
+
+        cellForMaxArea.textContent = ""+rowNumbers[i]+""
+        cellForMaxArea.id = "area "+i
+        rowOne.appendChild(cellForMaxArea)
+       
+        var rowValues = chartList[chartIndex][rowNumbers[i]][1]
+        var rowValuesLength = rowValues.length
+
+        for(let j = 0;j<chartColumnNumber;j++){
+            
+            var cellForRowValue = document.createElement('td')
+            cellForRowValue.id = "cell "+i+" "+j
+            
+            if(j < rowValuesLength){
+                cellForRowValue.textContent = rowValues[j]
+            }else{
+                cellForRowValue.textContent = 100
+            }
+            rowOne.appendChild(cellForRowValue)
+        }
+        upoTable.appendChild(rowOne)
+    }
 }
 
 function getChartIndex(chartType){
