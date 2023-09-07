@@ -107,11 +107,7 @@ function highlightColumn(id){
 
     if(selectedColumn === columnNumber){
         unselectAllInColumn(columnNumber)
-        if(chartIndex < 2){
-            selectAllInRowBCAfterColumn(selectedRow)
-        }else{
-            selectAllInRowDEAfterColumn(selectedRow)
-        }
+        selectAllInRowAfterColumn(selectedRow, chartIndex)
         selectedColumn = -1
     }else if(selectedColumn > -1 && selectedColumn !== columnNumber){
         unselectAllInColumn(selectedColumn)
@@ -121,9 +117,10 @@ function highlightColumn(id){
             if(chartIndex < 2){
                 var areaIndex = Math.floor(selectedRow/3)
                 var ratioIndex = selectedRow%3
-                selectAllInRowBC(areaIndex,ratioIndex)
+                selectAllInRow(areaIndex,ratioIndex, chartIndex)
             }else{
-                selectAllInRowDE(selectedRow)
+                selectAllInRow(selectedRow, undefined, chartIndex)
+                //selectAllInRowDE(selectedRow, chartIndex)
             }
         }
         
@@ -138,11 +135,7 @@ function selectAllInColumn(columnNumber){
     var chartIndex = getChartIndex()
 
     if(selectedRow > -1){
-        if(chartIndex < 2){
-            unselectAllInRowBCAfterColumn(selectedRow)
-        }else{
-            unselectAllInRowDEAfterColumn(selectedRow)
-        }
+        unselectAllInRowAfterColumn(selectedRow, chartIndex)
     }
 
     Array.from(allCells).forEach((cell) =>{
@@ -188,30 +181,43 @@ function unselectAllInColumn(columnNumber){
     })
 }
 
-function highlightRowBC(id){
+function highlightRow(id){
+    var chartIndex = getChartIndex()
     var rowIndices= id.split(" ")
-    var ratioIndex = Number(rowIndices.pop())
-    var areaIndex = Number(rowIndices.pop())
-    var rowNumber = (areaIndex*3)+ratioIndex
+    if(chartIndex < 2){
+        var ratioIndex = Number(rowIndices.pop())
+        var areaIndex = Number(rowIndices.pop())
+        var rowNumber = (areaIndex*3)+ratioIndex
+    }else{
+        var rowNumber = Number(rowIndices.pop())
+    }
 
     if(selectedRow === rowNumber){
-        unselectAllInRowBC(selectedRow)
+        unselectAllInRow(selectedRow, chartIndex)
         selectAllInColumnAfterRow(selectedColumn)
         selectedRow = -1
     }else if(selectedRow > -1 && selectedRow !== rowNumber){
-        unselectAllInRowBC(selectedRow)
+        unselectAllInRow(selectedRow, chartIndex)
         selectedRow = rowNumber
-        selectAllInRowBC(areaIndex, ratioIndex)
+        if(chartIndex < 2){
+            selectAllInRow(areaIndex, ratioIndex, chartIndex)
+        }else{
+            selectAllInRow(rowNumber,undefined, chartIndex)
+        }
         if(selectedColumn > -1){
             selectAllInColumn(selectedColumn)
         }
     }else{
         selectedRow = rowNumber
-        selectAllInRowBC(areaIndex, ratioIndex)
+        if(chartIndex < 2){
+            selectAllInRow(areaIndex, ratioIndex, chartIndex)
+        }else{
+            selectAllInRow(rowNumber,undefined, chartIndex)
+        }
     }
 }
 
-function selectAllInRowBC(areaIndex, ratioIndex){
+function selectAllInRow(areaIndex, ratioIndex, chartIndex){
     var allCells = document.getElementsByTagName('td')
 
     if(selectedColumn > -1){
@@ -220,36 +226,68 @@ function selectAllInRowBC(areaIndex, ratioIndex){
 
     Array.from(allCells).forEach((cell) =>{
         if(cell.id.startsWith("cell")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            var cellRatioNumber = Number(cellIndices[2])
-            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
-                var cellColumnNumber = Number(cellIndices[3])
-                if(selectedColumn === -1 || cellColumnNumber <= selectedColumn){
-                    cell.classList.add('selectedRow')
-                }
+            if(chartIndex < 2){
+                addHighlightToChartRowCell(cell, chartIndex, areaIndex, ratioIndex)
+            }else{
+                addHighlightToChartRowCell(cell, chartIndex, selectedRow, undefined)
             }
         }else if(cell.id.startsWith("area")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            if(areaIndex === cellAreaNumber){
-                cell.classList.add('selectedRow')
+            if(chartIndex < 2){
+                addHighlightToAreaRowCell(cell, areaIndex)
+            }else{
+                addHighlightToAreaRowCell(cell, selectedRow)
             }
         }else if(cell.id.startsWith("ratio")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            var cellRatioNumber = Number(cellIndices[2])
-            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
-                cell.classList.add('selectedRow')
-            }
+            addHighlightToRatioRowCell(cell, areaIndex, ratioIndex)
         }
     })
 }
 
-function unselectAllInRowBC(selectedRow){
+
+function addHighlightToAreaRowCell(cell, selectedRow){
+    var cellIndices = cell.id.split(" ")
+    var cellAreaNumber = Number(cellIndices[1])
+    if(selectedRow === cellAreaNumber){
+        cell.classList.add('selectedRow')
+    }
+}
+
+function addHighlightToChartRowCell(cell, chartIndex, areaIndex, ratioIndex){
+    var cellIndices = cell.id.split(" ")
+    var cellAreaNumber = Number(cellIndices[1])
+    if(chartIndex < 2){
+        var cellRatioNumber = Number(cellIndices[2])
+        if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
+            var cellColumnNumber = Number(cellIndices[3])
+            if(selectedColumn === -1 || cellColumnNumber <= selectedColumn){
+                cell.classList.add('selectedRow')
+            }
+        }
+    }else{
+        if(areaIndex === cellAreaNumber){
+            var cellColumnNumber = Number(cellIndices[2])
+            if(selectedColumn === -1 || cellColumnNumber <= selectedColumn){
+                cell.classList.add('selectedRow')
+            }
+        }
+    }
+}
+
+function addHighlightToRatioRowCell(cell, areaIndex, ratioIndex){
+    var cellIndices = cell.id.split(" ")
+    var cellAreaNumber = Number(cellIndices[1])
+    var cellRatioNumber = Number(cellIndices[2])
+    if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
+        cell.classList.add('selectedRow')
+    }
+}
+
+function unselectAllInRow(selectedRow, chartIndex){
     var allCells = document.getElementsByTagName('td')
-    var areaIndex = Math.floor(selectedRow/3)
-    var ratioIndex = selectedRow%3
+    if(chartIndex < 2){
+        var areaIndex = Math.floor(selectedRow/3)
+        var ratioIndex = selectedRow%3
+    }
 
     if(selectedColumn > -1){
         selectAllInColumn(selectedColumn)
@@ -257,29 +295,55 @@ function unselectAllInRowBC(selectedRow){
 
     Array.from(allCells).forEach( (cell) =>{
         if(cell.id.startsWith("cell")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            var cellRatioNumber = Number(cellIndices[2])
-            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
-                cell.classList.remove('selectedRow')
+            if(chartIndex < 2){
+                removeHighlightFromChartRowCell(cell, chartIndex, areaIndex, ratioIndex)
+            }else{
+                removeHighlightFromChartRowCell(cell, chartIndex, selectedRow, undefined)
             }
         }else if(cell.id.startsWith("area")){
-            var cellAreaNumber = Number(cell.id.split(" ").pop())
-            if(areaIndex === cellAreaNumber){
-                cell.classList.remove('selectedRow')
+            if(chartIndex < 2){
+                removeHighlightFromAreaRowCell(cell, areaIndex)
+            }else{
+                removeHighlightFromAreaRowCell(cell, selectedRow) 
             }
         }else if(cell.id.startsWith("ratio")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            var cellRatioNumber = Number(cellIndices[2])
-            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
-                cell.classList.remove('selectedRow')
-            }
+            removeHighlightFromRatioRowCell(cell, areaIndex, ratioIndex)
         }
     })
 }
 
-function selectAllInRowBCAfterColumn(selectedRow){
+function removeHighlightFromAreaRowCell(cell, selectedRow){
+    var cellAreaNumber = Number(cell.id.split(" ").pop())
+    if(selectedRow === cellAreaNumber){
+        cell.classList.remove('selectedRow')
+    }
+}
+
+function removeHighlightFromChartRowCell(cell, chartIndex, selectedRow, ratioIndex){
+    var cellIndices = cell.id.split(" ")
+    var cellAreaNumber = Number(cellIndices[1])
+    if(chartIndex < 2){
+        var cellRatioNumber = Number(cellIndices[2])
+        if(selectedRow === cellAreaNumber && ratioIndex === cellRatioNumber){
+            cell.classList.remove('selectedRow')
+        }
+    }else{
+        if(selectedRow === cellAreaNumber){
+            cell.classList.remove('selectedRow')
+        }
+    }
+}
+
+function removeHighlightFromRatioRowCell(cell, areaIndex, ratioIndex){
+    var cellIndices = cell.id.split(" ")
+    var cellAreaNumber = Number(cellIndices[1])
+    var cellRatioNumber = Number(cellIndices[2])
+    if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber){
+        cell.classList.remove('selectedRow')
+    }
+}
+
+function selectAllInRowAfterColumn(selectedRow, chartIndex){
     var allCells = document.getElementsByTagName('td')
     var areaIndex = Math.floor(selectedRow/3)
     var ratioIndex = selectedRow%3
@@ -288,17 +352,23 @@ function selectAllInRowBCAfterColumn(selectedRow){
         if(cell.id.startsWith("cell")){
             var cellIndices = cell.id.split(" ")
             var cellAreaNumber = Number(cellIndices[1])
-            var cellRatioNumber = Number(cellIndices[2])
-            var cellColumnNumber = Number(cellIndices[3])
-            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber && cellColumnNumber >= selectedColumn){
-                cell.classList.add('selectedRow')
+            if(chartIndex < 2){
+                var cellRatioNumber = Number(cellIndices[2])
+                var cellColumnNumber = Number(cellIndices[3])
+                if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber && cellColumnNumber >= selectedColumn){
+                    cell.classList.add('selectedRow')
+                }
+            }else{
+                var cellColumnNumber = Number(cellIndices[2])
+                if(selectedRow === cellAreaNumber && cellColumnNumber >= selectedColumn){
+                    cell.classList.add('selectedRow')
+                }    
             }
         }
     })
 }
 
-
-function unselectAllInRowBCAfterColumn(selectedRow){
+function unselectAllInRowAfterColumn(selectedRow, chartIndex){
     var allCells = document.getElementsByTagName('td')
     var areaIndex = Math.floor(selectedRow/3)
     var ratioIndex = selectedRow%3
@@ -307,14 +377,23 @@ function unselectAllInRowBCAfterColumn(selectedRow){
         if(cell.id.startsWith("cell")){
             var cellIndices = cell.id.split(" ")
             var cellAreaNumber = Number(cellIndices[1])
-            var cellRatioNumber = Number(cellIndices[2])
-            var cellColumnNumber = Number(cellIndices[3])
-            if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber && cellColumnNumber > selectedColumn){
-                cell.classList.remove('selectedRow')
+
+            if(chartIndex < 2){
+                var cellRatioNumber = Number(cellIndices[2])
+                var cellColumnNumber = Number(cellIndices[3])
+                if(areaIndex === cellAreaNumber && ratioIndex === cellRatioNumber && cellColumnNumber > selectedColumn){
+                    cell.classList.remove('selectedRow')
+                }
+            }else{
+                var cellColumnNumber = Number(cellIndices[2])
+                if(selectedRow === cellAreaNumber && cellColumnNumber > selectedColumn){
+                    cell.classList.remove('selectedRow')
+                }
             }
         }
     })
 }
+
 
 function selectAllInColumnAfterRow(columnNumber){
     var allCells = document.getElementsByTagName('td')
@@ -366,108 +445,6 @@ function unselectAllInColumnAfterRow(columnNumber){
     })
 }
 
-
-function highlightRowDE(id){
-    var rowIndices= id.split(" ")
-    var rowNumber = Number(rowIndices.pop())
-    
-    if(selectedRow === rowNumber){
-        unselectAllInRowDE(selectedRow)
-        selectAllInColumnAfterRow(selectedColumn)
-        selectedRow = -1
-    }else if(selectedRow > -1 && selectedRow !== rowNumber){
-        unselectAllInRowDE(selectedRow)
-        selectedRow = rowNumber
-        selectAllInRowDE(rowNumber)
-        if(selectedColumn > -1){
-            selectAllInColumn(selectedColumn)
-        }
-    }else{
-        selectedRow = rowNumber
-        selectAllInRowDE(rowNumber)
-    }
-}
-
-function selectAllInRowDE(areaIndex){
-    var allCells = document.getElementsByTagName('td')
-
-    if(selectedColumn > -1){
-        unselectAllInColumnAfterRow(selectedColumn)
-    }
-
-    Array.from(allCells).forEach((cell) =>{
-        if(cell.id.startsWith("cell")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            if(areaIndex === cellAreaNumber){
-                var cellColumnNumber = Number(cellIndices[2])
-                if(selectedColumn === -1 || cellColumnNumber <= selectedColumn){
-                    cell.classList.add('selectedRow')
-                }
-            }
-        }else if(cell.id.startsWith("area")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            if(areaIndex === cellAreaNumber){
-                cell.classList.add('selectedRow')
-            }
-        }
-    })
-}
-
-function unselectAllInRowDE(selectedRow){
-    var allCells = document.getElementsByTagName('td')
-
-    if(selectedColumn > -1){
-        selectAllInColumn(selectedColumn)
-    }
-
-    Array.from(allCells).forEach( (cell) =>{
-        if(cell.id.startsWith("cell")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            if(selectedRow === cellAreaNumber){
-                cell.classList.remove('selectedRow')
-            }
-        }else if(cell.id.startsWith("area")){
-            var cellAreaNumber = Number(cell.id.split(" ").pop())
-            if(selectedRow === cellAreaNumber){
-                cell.classList.remove('selectedRow')
-            }
-        }
-    })
-}
-
-function selectAllInRowDEAfterColumn(selectedRow){
-    var allCells = document.getElementsByTagName('td')
-    
-    Array.from(allCells).forEach( (cell) =>{
-        if(cell.id.startsWith("cell")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            var cellColumnNumber = Number(cellIndices[2])
-            if(selectedRow === cellAreaNumber && cellColumnNumber >= selectedColumn){
-                cell.classList.add('selectedRow')
-            }
-        }
-    })
-}
-
-function unselectAllInRowDEAfterColumn(selectedRow){
-    var allCells = document.getElementsByTagName('td')
-    
-    Array.from(allCells).forEach( (cell) =>{
-        if(cell.id.startsWith("cell")){
-            var cellIndices = cell.id.split(" ")
-            var cellAreaNumber = Number(cellIndices[1])
-            var cellColumnNumber = Number(cellIndices[2])
-            if(selectedRow === cellAreaNumber && cellColumnNumber > selectedColumn){
-                cell.classList.remove('selectedRow')
-            }
-        }
-    })
-}
-
 function addRowsToTable(){
     var upoTable = document.getElementById("upo_chart")
 
@@ -505,7 +482,7 @@ function createNonSprinkleredRows(upoTable, chartIndex){
             var cellForRatio = document.createElement('td')
             cellForRatio.textContent = ratioValues[j]
             cellForRatio.id = "ratio "+i+" "+j
-            cellForRatio.setAttribute('onclick', "highlightRowBC(this.id)")
+            cellForRatio.setAttribute('onclick', "highlightRow(this.id)")
             rowTwo.appendChild(cellForRatio)
 
             var rowValues = chartList[chartIndex][rowNumbers[i]][j+1]
@@ -540,7 +517,7 @@ function createSprinkleredRows(upoTable, chartIndex){
 
         cellForMaxArea.textContent = ""+rowNumbers[i]+""
         cellForMaxArea.id = "area "+i
-        cellForMaxArea.setAttribute('onclick', "highlightRowDE(this.id)")
+        cellForMaxArea.setAttribute('onclick', "highlightRow(this.id)")
         rowOne.appendChild(cellForMaxArea)
        
         var rowValues = chartList[chartIndex][rowNumbers[i]][1]
