@@ -1,7 +1,7 @@
 const unprotected_opening_limits_b = {
     "table_name" : "Area of Unprotected Openings for Groups A, C, D, and F, Division 3 Occupancies, %",
     "columns": 26,
-    "column_numbers": [0,1.2,1.5,2,2.5,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,25,30,350,40,45,50],
+    "column_numbers": [0,1.2,1.5,2,2.5,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,25,30,35,40,45,50],
     "row_numbers": [10,15,20,25,30,40,50,60,80,100,150,250,350,500,1000,2000],
     10 : {
         1: [0,8,10,18,29,46,91,100],
