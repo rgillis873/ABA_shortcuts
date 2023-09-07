@@ -11,14 +11,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function generateTableSelection(){
-    tableSelection = document.getElementById('tableType').value
     selectedColumn = -1
     selectedRow = -1
     clearTable()
-    addFirstHeadersToTable(tableSelection)
-    addSecondHeadersToTable(tableSelection)
-    addThirdHeadersToTable(tableSelection)
-    addRowsToTable(tableSelection)
+    addFirstHeadersToTable()
+    addSecondHeadersToTable()
+    addThirdHeadersToTable()
+    addRowsToTable()
 }
 
 function clearTable(){
@@ -26,12 +25,12 @@ function clearTable(){
     upoTable.innerHTML = ""
 }
 
-function addFirstHeadersToTable(chartType){
+function addFirstHeadersToTable(){
     upoTable = document.getElementById("upo_chart")
 
     var row = document.createElement('tr')
 
-    var chartIndex = getChartIndex(chartType)
+    var chartIndex = getChartIndex()
     var chartTitle = chartList[chartIndex]["table_name"]
     var chartColumnNumber = chartList[chartIndex]["columns"]
 
@@ -52,12 +51,12 @@ function addFirstHeadersToTable(chartType){
     upoTable.appendChild(row)
 }
 
-function addSecondHeadersToTable(chartType){
+function addSecondHeadersToTable(){
     upoTable = document.getElementById("upo_chart")
 
     var row = document.createElement('tr')
 
-    var chartIndex = getChartIndex(chartType)
+    var chartIndex = getChartIndex()
     var chartColumnNumber = chartList[chartIndex]["columns"]
 
     var headerOne = document.createElement('td')
@@ -71,7 +70,7 @@ function addSecondHeadersToTable(chartType){
 
     row.appendChild(headerOne)
 
-    if(chartType === "B" || chartType === "C"){
+    if(chartIndex < 2){
         var headerThree = document.createElement('td')
         headerThree.rowSpan = "2"
         headerThree.textContent = "Ratio (L/H or H/L)"
@@ -83,12 +82,12 @@ function addSecondHeadersToTable(chartType){
     upoTable.appendChild(row)
 }
 
-function addThirdHeadersToTable(chartType){
+function addThirdHeadersToTable(){
     upoTable = document.getElementById("upo_chart")
 
     var row = document.createElement('tr')
 
-    var chartIndex = getChartIndex(chartType)
+    var chartIndex = getChartIndex()
     var chartColumnNumber = chartList[chartIndex]["columns"]
 
     for(let i = 0;i<chartColumnNumber;i++){
@@ -104,8 +103,7 @@ function addThirdHeadersToTable(chartType){
 
 function highlightColumn(id){
     var columnNumber = Number(id.split(" ").pop())
-    var chartType = document.getElementById('tableType').value
-    var chartIndex = getChartIndex(chartType)
+    var chartIndex = getChartIndex()
 
     if(selectedColumn === columnNumber){
         unselectAllInColumn(columnNumber)
@@ -137,8 +135,7 @@ function highlightColumn(id){
 
 function selectAllInColumn(columnNumber){
     var allCells = document.getElementsByTagName('td')
-    var chartType = document.getElementById('tableType').value
-    var chartIndex = getChartIndex(chartType)
+    var chartIndex = getChartIndex()
 
     if(selectedRow > -1){
         if(chartIndex < 2){
@@ -321,8 +318,7 @@ function unselectAllInRowBCAfterColumn(selectedRow){
 
 function selectAllInColumnAfterRow(columnNumber){
     var allCells = document.getElementsByTagName('td')
-    var chartType = document.getElementById('tableType').value
-    var chartIndex = getChartIndex(chartType)
+    var chartIndex = getChartIndex()
 
     Array.from(allCells).forEach( (cell) =>{
         if(cell.id.startsWith("cell")){
@@ -347,8 +343,7 @@ function selectAllInColumnAfterRow(columnNumber){
 
 function unselectAllInColumnAfterRow(columnNumber){
     var allCells = document.getElementsByTagName('td')
-    var chartType = document.getElementById('tableType').value
-    var chartIndex = getChartIndex(chartType)
+    var chartIndex = getChartIndex()
 
     Array.from(allCells).forEach( (cell) =>{
         if(cell.id.startsWith("cell")){
@@ -423,7 +418,6 @@ function selectAllInRowDE(areaIndex){
 function unselectAllInRowDE(selectedRow){
     var allCells = document.getElementsByTagName('td')
 
-
     if(selectedColumn > -1){
         selectAllInColumn(selectedColumn)
     }
@@ -459,7 +453,6 @@ function selectAllInRowDEAfterColumn(selectedRow){
     })
 }
 
-
 function unselectAllInRowDEAfterColumn(selectedRow){
     var allCells = document.getElementsByTagName('td')
     
@@ -475,10 +468,10 @@ function unselectAllInRowDEAfterColumn(selectedRow){
     })
 }
 
-function addRowsToTable(chartType){
+function addRowsToTable(){
     var upoTable = document.getElementById("upo_chart")
 
-    var chartIndex = getChartIndex(chartType)
+    var chartIndex = getChartIndex()
   
     if(chartIndex <= 1){
         createNonSprinkleredRows(upoTable, chartIndex)
@@ -569,7 +562,8 @@ function createSprinkleredRows(upoTable, chartIndex){
     }
 }
 
-function getChartIndex(chartType){
+function getChartIndex(){
+    var chartType = document.getElementById('tableType').value
     var chartIndex = -1
     if(chartType === "B"){
         chartIndex = 0
