@@ -584,6 +584,9 @@ function createSprinkleredRows(upoTable, chartIndex){
         var cellForMaxArea = document.createElement('td')
 
         cellForMaxArea.textContent = ""+rowNumbers[i]+""
+        if(i === (rowNumbersLength-1)){
+            cellForMaxArea.textContent += " or more"
+        }
         cellForMaxArea.id = "area "+i
         cellForMaxArea.setAttribute('onclick', "highlightRow(this.id)")
         cellForMaxArea.classList.add('td-divider')
