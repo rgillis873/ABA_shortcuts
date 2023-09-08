@@ -8,40 +8,54 @@ html
     script(src='./js/unprotected_opening.js')
 
   body
-    h1 Calculate Unprotected Opening Percentage
-    h4 *Disclaimer* 
-    p This page is to be used to aid in the calculation of Unprotected Opening Limits. It is the user's responsibility to verify that the calculated values are correct.
-    strong Allows for quick calculations of Unprotected Opening Limits using the following tables:
-    p Table 3.2.3.1.B. Unprotected Opening Limits for a Building or Fire Compartment that is not Sprinklered
-    p Table 3.2.3.1.C. Unprotected Opening Limits for a Building or Fire Compartment that is not Sprinklered
-    p Table 3.2.3.1.D. Unprotected Opening Limits for a Building or Fire Compartment that is Sprinklered
-    p Table 3.2.3.1.E. Unprotected Opening Limits for a Building or Fire Compartment that is Sprinklered
-    strong Choose whether building is Non-Sprinklered on Sprinklered:
-    br
-    select.form-select(aria-label='Default select example' id='sprinkle')
-      option(value='Non-Sprinklered') Non-Sprinklered
-      option(value='Sprinklered') Sprinklered
-    br
-    br
-    strong Choose building type:
-    br
-    select.form-select(aria-label='Default select example' id='buildingType')
-      option(value='A') A
-      option(value='C') C
-      option(value='D') D
-      option(value='E') E
-      option(value='F1') F1
-      option(value='F2') F2
-      option(value='F3') F3
-    br
-    br
-    
-    strong Upload excel file with measurements
-    form(enctype="multipart/form-data")
-      div
-        input(type="file" id="excelFile" onclick="this.value=null;" accept=".xls,.xlsx")
-    br
-    br
-    table(id="myTable" class="table table-bordered")
+    style.
+      .table{
+        width: 80%;
+        margin-top: 1%;
+        margin-right: 10%;
+        margin-bottom: 10%;
+        margin-left: 10%;
+        border-collapse: separate!important;
+      }
+      div {
+        text-align: center;  
+      }
+      ul {
+        list-style-type: none;
+      }
+    div
+      h1 Calculate Unprotected Opening Percentage
+      h4 *Disclaimer* 
+      p This page is to be used to aid in the calculation of Unprotected Opening Limits. It is the user's responsibility to verify that the calculated values are correct.
+      strong Allows for quick calculations of Unprotected Opening Limits using the following tables:
+      ul
+        li Table 3.2.3.1.B. Unprotected Opening Limits for a Building or Fire Compartment that is not Sprinklered
+        li Table 3.2.3.1.C. Unprotected Opening Limits for a Building or Fire Compartment that is not Sprinklered
+        li Table 3.2.3.1.D. Unprotected Opening Limits for a Building or Fire Compartment that is Sprinklered
+        li Table 3.2.3.1.E. Unprotected Opening Limits for a Building or Fire Compartment that is Sprinklered
+      strong Choose whether building is Non-Sprinklered on Sprinklered:
+      br
+      select.form-select(aria-label='Default select example' id='sprinkle')
+        option(value='Non-Sprinklered') Non-Sprinklered
+        option(value='Sprinklered') Sprinklered
+      br
+      br
+      strong Choose building type:
+      br
+      select.form-select(aria-label='Default select example' id='buildingType')
+        option(value='A') A
+        option(value='C') C
+        option(value='D') D
+        option(value='E') E
+        option(value='F1') F1
+        option(value='F2') F2
+        option(value='F3') F3
+      br
+      br
+      strong Upload excel file with measurements
+      form(enctype="multipart/form-data")
+        div
+          input(type="file" id="excelFile" onclick="this.value=null;" accept=".xls,.xlsx")
+      table(id="myTable" class="table table-sm table-bordered")
 
 
