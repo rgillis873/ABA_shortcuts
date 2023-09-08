@@ -7,12 +7,20 @@ html
         script(src='./js/upo_chart_creation.js')
     body
     style.
-        table, th, td {
+        table, td {
             border: 1px solid black;
             text-align: center;
         }
+        th {
+            border: 1px solid black;
+            text-align: center;
+            background-color: #E0E0E0;
+        }
         .selectedCol, .selectedRow { 
-            background-color: #ace; 
+            background-color: #ace !important; 
+        }
+        .td-divider {
+            background-color: #E0E0E0;
         }
     h1 UPO Chart Lookup
     br
@@ -25,5 +33,7 @@ html
       option(value='D') 3.2.3.1.D
       option(value='E') 3.2.3.1.E
     br
+    br
+    strong(id="chart_info") 
     br
     table(id="upo_chart")

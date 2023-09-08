@@ -3,20 +3,14 @@ const app = express();
 const bodyParser = require("body-parser")
 const PORT = process.env.PORT || 3000
 
-//Use json
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended:true}));
-
-//Serve static files
 app.use(express.static("public"));
-
-//View Engine
 app.set("view engine", "pug");
 
 //Displays landing page for ABA Shortcuts
 app.get("/", async(req, res)=>{
     try {
-        //Render the page
         res.render("pages/index", {
         });
     } catch (err) {
@@ -27,7 +21,6 @@ app.get("/", async(req, res)=>{
 //Displays page for calculating unprotected openings
 app.get("/unprotected_opening", async(req, res)=>{
     try {
-        //Render the page
         res.render("pages/unprotected_opening", {
         });
     } catch (err) {
@@ -38,7 +31,6 @@ app.get("/unprotected_opening", async(req, res)=>{
 //Displays page for upo chart lookups
 app.get("/upo_charts", async(req, res)=>{
     try {
-        //Render the page
         res.render("pages/upo_charts", {
         });
     } catch (err) {
