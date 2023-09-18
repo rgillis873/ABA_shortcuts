@@ -38,6 +38,16 @@ app.get("/upo_charts", async(req, res)=>{
     }
 })
 
+//Displays page for upo chart lookups
+app.get("/aggregate_area", async(req, res)=>{
+    try {
+        res.render("pages/aggregate_area", {
+        });
+    } catch (err) {
+        console.error(err.message);
+    }
+})
+
 app.listen(PORT, () => {
-    console.log("server running on port "+PORT);
+    console.log("server running on port 3000");
 })
