@@ -8,7 +8,7 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.static("public"));
 app.set("view engine", "pug");
 
-//Displays landing page for ABA Shortcuts
+//Displays landing page for site
 app.get("/", async(req, res)=>{
     try {
         res.render("pages/index", {
@@ -38,7 +38,7 @@ app.get("/upo_charts", async(req, res)=>{
     }
 })
 
-//Displays page for upo chart lookups
+//Displays page calculating aggregate area
 app.get("/aggregate_area", async(req, res)=>{
     try {
         res.render("pages/aggregate_area", {
@@ -49,5 +49,5 @@ app.get("/aggregate_area", async(req, res)=>{
 })
 
 app.listen(PORT, () => {
-    console.log("server running on port 3000");
+    console.log("server running on port "+PORT);
 })

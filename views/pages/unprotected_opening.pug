@@ -6,23 +6,9 @@ html
     script(src="https://unpkg.com/xlsx/dist/xlsx.full.min.js")
     script(src='./js/upo_charts.js')
     script(src='./js/unprotected_opening.js')
+    link(rel='stylesheet' href='./css/calculation_pages.css')
 
   body
-    style.
-      .table{
-        width: 80%;
-        margin-top: 1%;
-        margin-right: 10%;
-        margin-bottom: 10%;
-        margin-left: 10%;
-        border-collapse: separate!important;
-      }
-      div {
-        text-align: center;  
-      }
-      ul {
-        list-style-type: none;
-      }
     div
       h1 Calculate Unprotected Opening Percentage
       h4 *Disclaimer* 
@@ -56,6 +42,5 @@ html
       form(enctype="multipart/form-data")
         div
           input(type="file" id="excelFile" onclick="this.value=null;" accept=".xls,.xlsx")
-      table(id="myTable" class="table table-sm table-bordered")
 
 

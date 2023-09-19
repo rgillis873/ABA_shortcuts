@@ -77,9 +77,6 @@ function addSecondHeadersToTable(){
     var chartIndex = getChartIndex()
     var chartColumnNumber = chartList[chartIndex]["columns"]
 
-    //var headerOne = document.createElement('td')
-   // var headerTwo = document.createElement('td')
-
     var headerOne = document.createElement('th')
     var headerTwo = document.createElement('th')
 
@@ -92,7 +89,6 @@ function addSecondHeadersToTable(){
     row.appendChild(headerOne)
 
     if(chartIndex < 2){
-        //var headerThree = document.createElement('td')
         var headerThree = document.createElement('th')
         headerThree.rowSpan = "2"
         headerThree.textContent = "Ratio (L/H or H/L)"

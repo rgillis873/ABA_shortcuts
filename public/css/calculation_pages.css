@@ -1,0 +1,14 @@
+.table{
+    width: 80%;
+    margin-top: 1%;
+    margin-right: 10%;
+    margin-bottom: 10%;
+    margin-left: 10%;
+    border-collapse: separate!important;
+  }
+  div {
+    text-align: center;  
+  }
+  ul {
+    list-style-type: none;
+  }

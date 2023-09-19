@@ -4,16 +4,18 @@ document.addEventListener('DOMContentLoaded', function() {
     })
 });
 
+// Function to parse info from the user-chosen excel file and 
+// add it to the table displayed on the page
 function handleExcelParsing(evt){
     var file = evt.target.files[0];
     var reader = new FileReader();
     reader.onload = function(e) {
         var jsonData = getJsonDataFromWorkbook(e)
-      
-        var table = document.getElementById('myTable');
+    
+        // Clear table if already displayed on page or create it if it doesn't exist
+        clearOrCreateTable()
 
-        // Clear table if already displayed on page
-        clearTable()
+        var table = document.getElementById('myTable');
 
         // Add excel info to the table and display it
         fillOutTable(jsonData, table)
@@ -22,22 +24,40 @@ function handleExcelParsing(evt){
     reader.readAsArrayBuffer(file);
 }
 
+// Get data from excel in json form
 function getJsonDataFromWorkbook(e){
     var data = new Uint8Array(e.target.result);
     var workbook = XLSX.read(data, {type: 'array'});
 
+    // Determine the correct sheet number to read from in the excel file
     var sheetNumber = getSheetNumber(workbook.SheetNames)
     var sheetName = workbook.SheetNames[sheetNumber];
+
     var jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {header:1});
     
     return jsonData
 }
 
-function clearTable(){
+// Function either clears the data from a pre-existing table or creates a new table if
+// it has not been added before
+function clearOrCreateTable(){
     var table = document.getElementById('myTable');
-    table.innerHTML = "";
+
+    // Clear table if it already exists
+    if(table !== null){
+        table.innerHTML = "";
+    
+    // Create table if it doesn't exist
+    }else{
+        var body = document.getElementsByTagName('body')[0]
+        var newTable = document.createElement("table")
+        newTable.id = "myTable"
+        newTable.classList.add("table", "table-sm", "table-bordered")
+        body.appendChild(newTable)
+    }
 }
 
+// Function fills out data in the table displayed on the page
 function fillOutTable(jsonData, table){
     var count = 0;
 
@@ -66,6 +86,7 @@ function fillOutTable(jsonData, table){
     document.body.appendChild(table);
 }
 
+// Function adds the selected headers from the excel file to the table
 function fillOutTableHeaders(row, rowData){
     row.className = "table-info"
     
@@ -89,6 +110,7 @@ function fillOutTableHeaders(row, rowData){
     }
 }
 
+// Function fills adds data to the table displayed on the page
 function fillOutTableData(row, rowData){
     var upoWithinLimits = true
 
@@ -107,24 +129,30 @@ function fillOutTableData(row, rowData){
     // Add percentage amounts
     for(let j = 3;j<5;j++){
         var cell = document.createElement('td')
+        
+        // For the permitted upo amount in the table
         if(j === 3){
-            proposedUpo = (rowData[j] * 100).toFixed(2)
+            proposedUpo = (rowData[4] * 100).toFixed(2)
             var permittedUpo = getPermittedUpo(rowData[1], rowData[2])
             cell.textContent = permittedUpo
+
             if(permittedUpo < proposedUpo){
                 upoWithinLimits = false
             }  
         }else{
             cell.textContent = (rowData[j] * 100).toFixed(2)     
         }
+
+        // Change cell colours (red, green) based on whether the proposed upo value is 
+        // less than the permitted amount
         changeUpoCellColourInTable(upoWithinLimits, cell)
 
         row.appendChild(cell)
     }
 }
 
+ // Function to change cell colour to green or red depending on if predicted upo is within the allowed limits
 function changeUpoCellColourInTable(upoWithinLimits, cell){
-    // Change cell colour to green or red depending on if predicted upo is within the allowed limits
     if(!upoWithinLimits){
         cell.className = "bg-danger"
     }else{
@@ -132,6 +160,7 @@ function changeUpoCellColourInTable(upoWithinLimits, cell){
     }
 }
 
+// Function to retrieve the index of the sheet in the excel that is for UPO Calculations - Part 9
 function getSheetNumber(listOfSheetNumbers){
     for(let i = 0;i<listOfSheetNumbers.length;i++){
         if(listOfSheetNumbers[i].startsWith("UPO Calculations - Part 9")){
@@ -141,6 +170,9 @@ function getSheetNumber(listOfSheetNumbers){
     return 0
 }
 
+
+// Function takes in area value and determines the closest matching max area value.
+// The max area value returned is greater than or equal to the inputted area value.
 function calculateMaxArea(area){
     if(area > 100){
         return 101
@@ -154,7 +186,16 @@ function calculateMaxArea(area){
     }
 }
 
+
+// Function determines the correct limiting distance index to use when looking up the
+// percentage in the chart 
 function limitingDistanceToArrayIndex(limDist){
+    if(limDist < 1.2){
+        return 0
+    }else if(limDist > 25){
+        return 14
+    }
+
     index = 0
     lim_distances = [0, 1.2, 1.5, 2, 2.5, 3 ,4, 6, 8, 10, 12, 16, 20, 25]
 
@@ -168,6 +209,8 @@ function limitingDistanceToArrayIndex(limDist){
     return index
 }
 
+// Function determines which of the two charts to use based on the user's selected building type.
+// Buildings of type C,D, and F3 use one chart, while buildings of type E, F1 and F2 use the other chart.
 function getChartSelectionBasedOnBuildingType(){
     buildingTypeSelection = document.getElementById("buildingType").value
     if(buildingTypeSelection === "C" || buildingTypeSelection ===  "D" || buildingTypeSelection === "F3"){
@@ -176,6 +219,9 @@ function getChartSelectionBasedOnBuildingType(){
     return "mercantile"
 }
 
+
+// Function calculates the permitted upo by using the chart type max total area and limiting distance index to look 
+// up the corresponding value in the chart.
 function calculatePermittedUpo(chartSelection, maxTotalArea, limitingDistanceIndex){
     rowInChart = max_aggregate_area[chartSelection][maxTotalArea]
     if(limitingDistanceIndex >= rowInChart.length){
@@ -184,14 +230,11 @@ function calculatePermittedUpo(chartSelection, maxTotalArea, limitingDistanceInd
     return rowInChart[limitingDistanceIndex]
 }
 
+// Function retrieves the permitted upo value
 function getPermittedUpo(areaEBF, limDist){
     chartSelection = getChartSelectionBasedOnBuildingType()
     limitingDistanceIndex = limitingDistanceToArrayIndex(limDist)
     maxTotalArea = calculateMaxArea(areaEBF)
-    console.log(" ")
-    console.log(chartSelection)
-    console.log(maxTotalArea)
-    console.log(limitingDistanceIndex)
     var permittedUpo = calculatePermittedUpo(chartSelection, maxTotalArea, limitingDistanceIndex)
     return permittedUpo
 }

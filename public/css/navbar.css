@@ -1,0 +1,19 @@
+body {
+    font-family: Arial, sans-serif;
+}
+.navbar-custom-aba {
+    overflow: hidden;
+    background-color: #333;
+}
+.navbar-custom-aba a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+.navbar-custom-abab a:hover {
+    background-color: #ddd;
+    color: black;
+}

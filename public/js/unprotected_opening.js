@@ -9,16 +9,18 @@ document.addEventListener('DOMContentLoaded', function() {
     })
 });
 
+// Function to parse info from the user-chosen excel file and 
+// add it to the table displayed on the page
 function handleExcelParsing(evt){
     var file = evt.target.files[0];
     var reader = new FileReader();
     reader.onload = function(e) {
         var jsonData = getJsonDataFromWorkbook(e)
       
-        var table = document.getElementById('myTable');
+        // Clear table if already displayed on page or create it if it doesn't exist
+        clearOrCreateTable()
 
-        // Clear table if already displayed on page
-        clearTable()
+        var table = document.getElementById('myTable');
 
         // Add excel info to the table and display it
         fillOutTable(jsonData, table)
@@ -27,23 +29,40 @@ function handleExcelParsing(evt){
     reader.readAsArrayBuffer(file);
 }
 
+// Get data from excel in json form
 function getJsonDataFromWorkbook(e){
     var data = new Uint8Array(e.target.result);
     var workbook = XLSX.read(data, {type: 'array'});
 
+    // Determine the correct sheet number to read from in the excel file
     var sheetNumber = getSheetNumber(workbook.SheetNames)
     var sheetName = workbook.SheetNames[sheetNumber];
+    
     var jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {header:1});
     
     return jsonData
 }
 
-function clearTable(){
-    // Create a new table
+// Function either clears the data from a pre-existing table or creates a new table if
+// it has not been added before
+function clearOrCreateTable(){
     var table = document.getElementById('myTable');
-    table.innerHTML = "";
+
+    // Clear table if it already exists
+    if(table !== null){
+        table.innerHTML = "";
+    
+    // Create table if it doesn't exist
+    }else{
+        var body = document.getElementsByTagName('body')[0]
+        var newTable = document.createElement("table")
+        newTable.id = "myTable"
+        newTable.classList.add("table", "table-sm", "table-bordered")
+        body.appendChild(newTable)
+    }
 }
 
+// Function fills out data in the table displayed on the page
 function fillOutTable(jsonData, table){
     var count = 0;
 
@@ -51,7 +70,6 @@ function fillOutTable(jsonData, table){
     jsonData.forEach(function(rowData) {
         if(rowData[0] != undefined && rowData[0].length > 0){
                 
-            // Create a new row
             var row = document.createElement('tr');
 
             // Create column headers
@@ -74,36 +92,40 @@ function fillOutTable(jsonData, table){
     document.body.appendChild(table);
 }
 
+// Function adds the selected headers from the excel file to the table
 function fillOutTableHeaders(row, rowData){
     row.className = "table-info"
     for(let i = 0;i<7;i++) {
-        // Create a new cell
+        
         var cell = document.createElement('td');
         cell.textContent = rowData[i];
             
-        // Add the cell to the row
         row.appendChild(cell);
     }
 }
 
+// Function fills adds data to the table displayed on the page
 function fillOutTableData(row, rowData){
     var upoWithinLimits = true
     for(let i = 0;i<7;i++) {
-        // Create a new cell
+        
         var cell = document.createElement('td');
-                    
+           
+        // For column on permitted upo
         if(i == 5){
             isBuildingSprinklered = document.getElementById('sprinkle').value === 'Sprinklered'
             buildingType = document.getElementById('buildingType').value
-            allowable_opening = get_allowable_unprotected_opening_percentage(rowData[1], rowData[3], rowData[2], isBuildingSprinklered, buildingType)
+            allowableOpening = getAllowableUnprotectedOpeningPercentage(rowData[1], rowData[3], rowData[2], isBuildingSprinklered, buildingType)
                             
-            if(rowData[6] != undefined && (rowData[6] * 100) > allowable_opening){
+            if(rowData[6] != undefined && (rowData[6] * 100).toFixed(2) > allowableOpening){
                 upoWithinLimits = false
             }
-            cell.textContent = allowable_opening
+            cell.textContent = allowableOpening
+        
+        // For column on proposed upo
         }else if(i == 6){
             if(rowData[6] != undefined){
-                cell.textContent = rowData[6] * 100
+                cell.textContent = (rowData[6] * 100).toFixed(2)
             }else{
                 cell.textContent = " "
             }
@@ -118,6 +140,7 @@ function fillOutTableData(row, rowData){
     }
 }
 
+// Function to change cell colour to green or red depending on if predicted upo is within the allowed limits
 function changeUpoCellColourInTable(column, upoWithinLimits, cell){
      // Change cell colour to green or red depending on if predicted upo is within the allowed limits
      if(column >= 5 && !upoWithinLimits){
@@ -127,6 +150,8 @@ function changeUpoCellColourInTable(column, upoWithinLimits, cell){
     }
 }
 
+// Function removes all options from select dropdown for 
+// building type
 function removeBuildingTypeOptions(){
     var buildingTypeSelect = document.getElementById('buildingType')
 
@@ -135,6 +160,8 @@ function removeBuildingTypeOptions(){
     }
 }
 
+// Function adds options from select dropdown for 
+// building type
 function addBuildingTypeOptions(){
     var sprinkleredSelect = document.getElementById('sprinkle')
     var buildingTypeSelect = document.getElementById('buildingType')
@@ -154,53 +181,61 @@ function addBuildingTypeOptions(){
     buildingTypeSelect.add(new Option('F3','F3'), undefined)
 }
 
-function getSheetNumber(list_of_sheet_numbers){
-    for(let i = 0;i<list_of_sheet_numbers.length;i++){
-        if(list_of_sheet_numbers[i].startsWith("UPO Calculations - Part 3")){
+// Function to retrieve the index of the sheet in the excel that is for UPO Calculations - Part 9
+function getSheetNumber(listOfSheetNumbers){
+    for(let i = 0;i<listOfSheetNumbers.length;i++){
+        if(listOfSheetNumbers[i].startsWith("UPO Calculations - Part 3")){
             return i
         }
     }
     return 0
 }
 
-function determine_max_area(area_value, isBuildingSprinklered, buildingType){
+
+// Function takes in area value and determines the corresponding max value 
+// that is listed in the chart
+function determineMaxArea(areaValue, isBuildingSprinklered, buildingType){
     if(isBuildingSprinklered){
         if((buildingType === 'A' || buildingType === 'B' || buildingType === 'C' || buildingType === 'D' || buildingType === 'F3') && 
-        area_value >= 150){
+        areaValue >= 150){
             return 150
         }
 
-        if((buildingType === 'E' || buildingType === 'F1' || buildingType === 'F2') && area_value >= 200){
+        if((buildingType === 'E' || buildingType === 'F1' || buildingType === 'F2') && areaValue >= 200){
             return 200
         }
     }
 
-    var area_values = [10,15,20,25,30,40,50,60,80,100,150,250,350,500,1000,2000]
-    for(let i = 0;i<area_values.length;i++){
-        if(area_value <= area_values[i]){
-            return area_values[i]
+    var areaValues = [10,15,20,25,30,40,50,60,80,100,150,250,350,500,1000,2000]
+    for(let i = 0;i<areaValues.length;i++){
+        if(areaValue <= areaValues[i]){
+            return areaValues[i]
         }
     }
 }
 
-function determine_ratio_length_height(ratio){
-    ratio_option = 0
+// Function determines which ratio value to use for chart lookup of
+// upo value
+function determineRatioLengthHeight(ratio){
+    ratioOption = 0
     if(ratio < 3){
-        ratio_option =  1 
+        ratioOption =  1 
     }else if(ratio >= 3 && ratio <= 10){
-        ratio_option =  2
+        ratioOption =  2
     }else{
-        ratio_option = 3
+        ratioOption = 3
     } 
-    return ratio_option
+    return ratioOption
 }
 
-function limiting_distance_to_index(lim_dist){
+// Function determines the correct limiting distance index to use when looking up the
+// percentage in the chart 
+function limitingDistanceToIndex(limDist){
     index = 0
-    lim_distances = [0, 1.2, 1.5, 2, 2.5, 3 ,4, 5 ,6,7,8,9,10,11,12,13,14,16,18,20,25,30,35,40,45,50,55,60, 65, 70]
+    limDistances = [0, 1.2, 1.5, 2, 2.5, 3 ,4, 5 ,6,7,8,9,10,11,12,13,14,16,18,20,25,30,35,40,45,50,55,60, 65, 70]
 
-    for(let i = 0;i<lim_distances.length;i++){
-        if(lim_dist <= lim_distances[i]){
+    for(let i = 0;i<limDistances.length;i++){
+        if(limDist <= limDistances[i]){
             index = i
             break
         }
@@ -209,17 +244,22 @@ function limiting_distance_to_index(lim_dist){
     return index
 }
 
-function get_percentage(max_area, ratio_length_height, lim_dist_index, chartToUse){
-    chart_list = [unprotected_opening_limits_b, unprotected_opening_limits_c, unprotected_opening_limits_d, unprotected_opening_limits_e]
-    opening_limits_list = chart_list[chartToUse][max_area][ratio_length_height]
-    if(lim_dist_index >= opening_limits_list.length){
+
+// Fuction retrieves the upo percentage by doing a chart lookup using the 
+// inputted values
+function getUpoPercentage(maxArea, ratioLengthHeight, limDistIndex, chartToUse){
+    chartList = [unprotected_opening_limits_b, unprotected_opening_limits_c, unprotected_opening_limits_d, unprotected_opening_limits_e]
+    openingLimitsList = chartList[chartToUse][maxArea][ratioLengthHeight]
+    if(limDistIndex >= openingLimitsList.length){
         percentage = 100
     }else{
-        percentage = opening_limits_list[lim_dist_index]
+        percentage = openingLimitsList[limDistIndex]
     }
     return percentage
 }
 
+// Function determines which of the 4 charts to use based on 
+// whether the building is sprinklered and the building type
 function determineWhichChartToUse(isBuildingSprinklered, buildingType){
     var chartToUse = -1
     if(!isBuildingSprinklered){
@@ -238,16 +278,19 @@ function determineWhichChartToUse(isBuildingSprinklered, buildingType){
     return chartToUse
 }
 
-function get_allowable_unprotected_opening_percentage(area, lh_ratio, limiting_distance, isBuildingSprinklered, buildingType){
-    max_area = determine_max_area(area, isBuildingSprinklered, buildingType)
-    ratio_length_height = 1
+
+// Function determines the correct chart indices to use for 
+// upo percentage lookup and then returns the correct upo value
+function getAllowableUnprotectedOpeningPercentage(area, lhRatio, limitingDistance, isBuildingSprinklered, buildingType){
+    maxArea = determineMaxArea(area, isBuildingSprinklered, buildingType)
+    ratioLengthHeight = 1
     if(!isBuildingSprinklered){
-        ratio_length_height = determine_ratio_length_height(lh_ratio)
+        ratioLengthHeight = determineRatioLengthHeight(lhRatio)
     }
-    limit_distance_index = limiting_distance_to_index(limiting_distance)
+    limitDistanceIndex = limitingDistanceToIndex(limitingDistance)
     chartToUse = determineWhichChartToUse(isBuildingSprinklered, buildingType)
-    opening_percentage = get_percentage(max_area, ratio_length_height, limit_distance_index, chartToUse)
-    return opening_percentage
+    openingPercentage = getUpoPercentage(maxArea, ratioLengthHeight, limitDistanceIndex, chartToUse)
+    return openingPercentage
 }
 
   
